@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mbacchen — ANITWT CUP 4</title>
+<style>
+  :root {
+    --bg: #f4f4f6;
+    --card: #ffffff;
+    --border: #e4e4e9;
+    --text: #2b2b30;
+    --muted: #8a8a92;
+    --accent: #d94a8c;
+    --accent-soft: #fbeaf2;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: "Segoe UI", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* ── Tarjeta de perfil ─────────────────────────── */
+  .trainer-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 36px 40px 32px;
+    box-shadow: 0 4px 18px rgba(0,0,0,.05);
+  }
+
+  .profile-row {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    flex-wrap: wrap;
+  }
+
+  .avatar {
+    width: 148px;
+    height: 148px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid var(--accent-soft);
+    box-shadow: 0 0 0 2px var(--accent);
+  }
+  .avatar-placeholder {
+    width: 148px;
+    height: 148px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 56px;
+    border: 4px solid var(--accent-soft);
+    box-shadow: 0 0 0 2px var(--accent);
+  }
+
+  .trainer-info h1 {
+    font-size: 34px;
+    font-weight: 700;
+  }
+  .trainer-info .subtitle {
+    color: var(--muted);
+    font-size: 16px;
+    margin-top: 4px;
+  }
+  .trainer-info .game {
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 1px;
+    margin-top: 3px;
+    text-transform: uppercase;
+  }
+
+  .deaths {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #7a3040;
+    background: #fbecee;
+    border: 1px solid #f2d4da;
+    border-radius: 8px;
+    padding: 5px 12px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .deaths:hover {
+    transform: translateY(-2px);
+    background: #f7dde2;
+    box-shadow: 0 4px 14px rgba(122, 48, 64, .25);
+  }
+  .deaths .skull { font-size: 15px; }
+
+  .header-right {
+    margin-left: auto;
+    text-align: right;
+  }
+  .header-right .label {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .badges-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 44px);
+    gap: 10px;
+    justify-content: end;
+  }
+  .badge-img {
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
+    transition: filter .3s ease, transform .2s ease;
+  }
+  .badge-img.gray {
+    filter: grayscale(1) opacity(.35);
+  }
+  .badge-img:hover { transform: scale(1.12); }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 30px 0 26px;
+  }
+
+  /* ── Slots del equipo ──────────────────────────── */
+  .team-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  .team-row {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+
+  .slot {
+    position: relative;
+    width: 92px;
+    height: 92px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
+  }
+
+  .slot img {
+    width: 68px;
+    height: 68px;
+    image-rendering: pixelated;
+    object-fit: contain;
+    transition: filter .18s ease, transform .18s ease;
+  }
+
+  .slot.empty img {
+    width: 34px;
+    height: 34px;
+    opacity: .45;
+    filter: grayscale(.6);
+  }
+
+  .slot.filled { cursor: pointer; }
+  .slot.filled:hover {
+    transform: translateY(-4px);
+    z-index: 60;
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    box-shadow: 0 6px 22px rgba(217, 74, 140, .35), 0 0 0 4px rgba(217, 74, 140, .12);
+  }
+  .slot.filled:hover img {
+    filter: brightness(1.25) drop-shadow(0 0 8px rgba(217, 74, 140, .6));
+    transform: scale(1.08);
+  }
+
+  /* slots pequeños (tramos) */
+  .slot.mini { width: 64px; height: 64px; }
+  .slot.mini img { width: 48px; height: 48px; }
+
+  /* ── Tooltip del pokémon ───────────────────────── */
+  .poke-tip {
+    position: absolute;
+    top: calc(100% + 14px);
+    left: 50%;
+    transform: translateX(-50%) translateY(6px);
+    width: 250px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.14);
+    padding: 16px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity .18s ease, transform .18s ease;
+    z-index: 30;
+    text-align: left;
+    color: var(--text);
+  }
+  .slot.filled:hover .poke-tip,
+  .box-slot.filled:hover .poke-tip,
+  .grave:hover .poke-tip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+  }
+  .poke-tip::before {
+    content: "";
+    position: absolute;
+    top: -7px;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+    width: 12px;
+    height: 12px;
+    background: var(--card);
+    border-left: 1px solid var(--border);
+    border-top: 1px solid var(--border);
+  }
+
+  .poke-tip .tip-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 2px;
+  }
+  .poke-tip .poke-name {
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .poke-tip .chips { display: flex; gap: 4px; flex-shrink: 0; }
+  .gender { font-weight: 700; margin-left: 2px; }
+  .gender.m { color: #4a90d9; }
+  .gender.f { color: #e06090; }
+
+  .poke-tip .tip-row {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 5px;
+  }
+  .poke-tip .tip-row b { color: var(--text); }
+
+  .poke-tip .moves {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-top: 12px;
+  }
+  .poke-tip .move {
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid rgba(0,0,0,.14);
+    border-radius: 7px;
+    padding: 5px 8px;
+    text-align: center;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,.25);
+    line-height: 1.25;
+  }
+  .poke-tip .move.none {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-weight: 400;
+    text-shadow: none;
+  }
+
+  /* ── Colores + texturas por tipo ───────────────── */
+  .mv-normal, .t-normal {
+    background-color: #a8a090;
+    background-image: repeating-linear-gradient(0deg, rgba(255,255,255,.09) 0 1px, transparent 1px 4px);
+  }
+  .mv-fire, .t-fire {
+    background-color: #e8613c;
+    background-image: radial-gradient(ellipse at 50% 135%, rgba(255,230,110,.75), rgba(255,150,60,.3) 45%, transparent 70%);
+  }
+  .mv-water, .t-water {
+    background-color: #4a90d9;
+    background-image: radial-gradient(circle at 8px -4px, transparent 7px, rgba(255,255,255,.28) 8px, transparent 10.5px);
+    background-size: 16px 10px;
+  }
+  .mv-grass, .t-grass {
+    background-color: #4faf50;
+    background-image: repeating-linear-gradient(115deg, rgba(255,255,255,.22) 0 2px, transparent 2px 7px);
+  }
+  .mv-electric, .t-electric {
+    background-color: #e0c030;
+    background-image: repeating-linear-gradient(-60deg, rgba(255,255,255,.35) 0 3px, transparent 3px 9px);
+  }
+  .mv-bug, .t-bug {
+    background-color: #a0b020;
+    background-image: radial-gradient(rgba(255,255,255,.3) 1.3px, transparent 1.9px);
+    background-size: 7px 7px;
+  }
+  .mv-poison, .t-poison {
+    background-color: #9050a0;
+    background-image:
+      radial-gradient(circle at 25% 35%, rgba(255,255,255,.3) 2.5px, transparent 3.2px),
+      radial-gradient(circle at 70% 70%, rgba(255,255,255,.2) 3.5px, transparent 4.2px);
+    background-size: 24px 18px;
+  }
+  .mv-flying, .t-flying {
+    background-color: #90a8e0;
+    background-image: repeating-linear-gradient(180deg, rgba(255,255,255,.28) 0 2px, transparent 2px 8px);
+  }
+  .mv-ground, .t-ground {
+    background-color: #d0a048;
+    background-image: repeating-linear-gradient(0deg, rgba(0,0,0,.12) 0 2px, transparent 2px 7px);
+  }
+  .mv-rock, .t-rock {
+    background-color: #b0a060;
+    background-image:
+      repeating-linear-gradient(45deg, rgba(0,0,0,.13) 0 2px, transparent 2px 9px),
+      repeating-linear-gradient(-45deg, rgba(0,0,0,.13) 0 2px, transparent 2px 9px);
+  }
+  .mv-ice, .t-ice {
+    background-color: #6cc4d4;
+    background-image:
+      repeating-linear-gradient(45deg, rgba(255,255,255,.4) 0 1.5px, transparent 1.5px 8px),
+      repeating-linear-gradient(-45deg, rgba(255,255,255,.4) 0 1.5px, transparent 1.5px 8px);
+  }
+  .mv-psychic, .t-psychic {
+    background-color: #e06090;
+    background-image: radial-gradient(circle, transparent 4px, rgba(255,255,255,.25) 5px, transparent 6.5px, transparent 10px, rgba(255,255,255,.15) 11px, transparent 12px);
+    background-size: 28px 28px;
+    background-position: center;
+  }
+  .mv-ghost, .t-ghost {
+    background-color: #705890;
+    background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.15) 0 3px, transparent 3px 10px);
+  }
+  .mv-dragon, .t-dragon {
+    background-color: #7050e8;
+    background-image: repeating-linear-gradient(135deg, rgba(255,255,255,.22) 0 4px, transparent 4px 13px);
+  }
+  .mv-dark, .t-dark {
+    background-color: #6b5848;
+    background-image: radial-gradient(ellipse at center, rgba(255,255,255,.1), rgba(0,0,0,.3));
+  }
+  .mv-steel, .t-steel {
+    background-color: #a0a8b0;
+    background-image: linear-gradient(105deg, rgba(255,255,255,.45) 0%, transparent 30%, rgba(255,255,255,.2) 55%, transparent 75%);
+  }
+  .mv-fairy, .t-fairy {
+    background-color: #e88ad8;
+    background-image:
+      radial-gradient(circle at 30% 30%, rgba(255,255,255,.6) 1.2px, transparent 2px),
+      radial-gradient(circle at 75% 65%, rgba(255,255,255,.4) 1.8px, transparent 2.6px);
+    background-size: 18px 14px;
+  }
+  .mv-fighting, .t-fighting {
+    background-color: #c04030;
+    background-image: repeating-linear-gradient(90deg, rgba(0,0,0,.14) 0 4px, transparent 4px 11px);
+  }
+
+  .type-chip {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    padding: 3px 9px;
+    border-radius: 5px;
+    color: #fff;
+    text-transform: uppercase;
+    text-shadow: 0 1px 2px rgba(0,0,0,.3);
+  }
+
+  /* ── Tramos (desplegable) ──────────────────────── */
+  .tramo-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 26px;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 9px 16px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    cursor: pointer;
+    transition: color .15s ease, border-color .15s ease, background .15s ease;
+  }
+  .tramo-toggle:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .tramo-toggle .chev {
+    display: inline-block;
+    transition: transform .2s ease;
+    font-size: 11px;
+  }
+  .tramo-toggle.open .chev { transform: rotate(180deg); }
+
+  .tramo-panel {
+    display: none;
+    margin-top: 18px;
+    border: 1px dashed var(--border);
+    border-radius: 14px;
+    padding: 6px 20px;
+  }
+  .tramo-panel.open { display: block; }
+
+  .tramo-row {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--border);
+  }
+  .tramo-row:last-child { border-bottom: none; }
+  .tramo-loc {
+    width: 150px;
+    flex-shrink: 0;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .tramo-pokes { display: flex; gap: 12px; }
+  .tramo-deaths {
+    font-size: 12px;
+    font-weight: 600;
+    color: #7a3040;
+  }
+  .tramo-deaths b { color: #7a3040; }
+
+  /* ── Caja ──────────────────────────────────────── */
+  .box-section { margin-top: 32px; }
+  .section-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .capture-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 30px 28px 34px;
+    box-shadow: 0 4px 18px rgba(0,0,0,.05);
+  }
+
+  .box-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 84px);
+    gap: 16px;
+    justify-content: center;
+    margin-top: 6px;
+  }
+
+  .box-slot {
+    position: relative;
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+  }
+  .box-slot img {
+    width: 64px;
+    height: 64px;
+    image-rendering: pixelated;
+    object-fit: contain;
+    transition: filter .18s ease, transform .18s ease;
+  }
+  .box-slot.filled { cursor: pointer; }
+  .box-slot.filled:hover {
+    transform: translateY(-4px);
+    z-index: 60;
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    box-shadow: 0 6px 22px rgba(217, 74, 140, .35), 0 0 0 4px rgba(217, 74, 140, .12);
+  }
+  .box-slot.filled:hover img {
+    filter: brightness(1.25) drop-shadow(0 0 8px rgba(217, 74, 140, .6));
+    transform: scale(1.08);
+  }
+
+  /* ── Cementerio (overlay) ──────────────────────── */
+  .cemetery {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: none;
+    overflow-y: auto;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(255,255,255,.5) 1px, transparent 2px),
+      radial-gradient(circle at 40% 10%, rgba(255,255,255,.4) 1px, transparent 2px),
+      radial-gradient(circle at 70% 25%, rgba(255,255,255,.45) 1.2px, transparent 2.2px),
+      radial-gradient(circle at 85% 12%, rgba(255,255,255,.35) 1px, transparent 2px),
+      radial-gradient(circle at 55% 18%, rgba(255,255,255,.3) 1px, transparent 2px),
+      radial-gradient(circle at 28% 8%, rgba(255,255,255,.4) 1px, transparent 2px),
+      radial-gradient(circle at 82% 18%, rgba(240,235,215,.95) 38px, rgba(240,235,215,.2) 46px, transparent 60px),
+      linear-gradient(180deg, #131022 0%, #221c3a 55%, #2e2748 100%);
+  }
+  .cemetery.open { display: block; }
+
+  .cemetery-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 60px 24px 100px;
+    text-align: center;
+    color: #cfc8e0;
+  }
+  .cemetery h2 {
+    font-size: 30px;
+    color: #ece7f7;
+    letter-spacing: 2px;
+    margin-bottom: 46px;
+  }
+  .no-graves {
+    font-size: 14px;
+    font-style: italic;
+    color: #9a90b8;
+  }
+
+  .close-cemetery {
+    position: fixed;
+    top: 22px;
+    right: 26px;
+    z-index: 110;
+    background: rgba(255,255,255,.1);
+    border: 1px solid rgba(255,255,255,.25);
+    color: #ece7f7;
+    font-size: 18px;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background .15s ease, transform .15s ease;
+  }
+  .close-cemetery:hover { background: rgba(255,255,255,.22); transform: scale(1.08); }
+
+  .graves-row {
+    display: flex;
+    gap: 34px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .grave {
+    position: relative;
+    width: 190px;
+    padding: 26px 18px 18px;
+    border-radius: 95px 95px 10px 10px;
+    background:
+      repeating-linear-gradient(45deg, rgba(0,0,0,.05) 0 2px, transparent 2px 9px),
+      linear-gradient(180deg, #8d879e 0%, #6f6880 70%, #5d5670 100%);
+    border: 2px solid #4a4460;
+    box-shadow: 0 14px 30px rgba(0,0,0,.45);
+    cursor: pointer;
+    transition: transform .18s ease, box-shadow .18s ease;
+  }
+  .grave:hover {
+    transform: translateY(-5px);
+    z-index: 60;
+    box-shadow: 0 18px 40px rgba(0,0,0,.6), 0 0 26px rgba(180,160,255,.25);
+  }
+  .grave img {
+    width: 78px;
+    height: 78px;
+    image-rendering: pixelated;
+    object-fit: contain;
+    filter: grayscale(1) brightness(.85);
+    transition: filter .2s ease;
+  }
+  .grave:hover img { filter: grayscale(.4) brightness(1); }
+  .grave .grave-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #ece7f7;
+    margin-top: 8px;
+  }
+  .grave .candle { font-size: 14px; margin-top: 8px; opacity: .9; }
+
+  .fog {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    height: 130px;
+    background: linear-gradient(180deg, transparent, rgba(190,180,220,.16) 45%, rgba(210,200,235,.25));
+    pointer-events: none;
+    z-index: 105;
+  }
+  .cemetery:not(.open) .fog { display: none; }
+
+  footer {
+    margin-top: 48px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  footer .hearts { color: var(--accent); }
+
+  @media (max-width: 640px) {
+    .trainer-card { padding: 24px; }
+    .header-right { margin-left: 0; text-align: left; }
+    .badges-grid { justify-content: start; }
+    .tramo-loc { width: 110px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ── Perfil ── -->
+  <section class="trainer-card">
+    <div class="profile-row">
+      <img class="avatar" src="perfil.png" alt="Foto de perfil de mbacchen"
+           onerror="if(!this.dataset.try){this.dataset.try=1;this.src='perfil.jpg';}else{this.outerHTML='<div class=&quot;avatar-placeholder&quot;>✧</div>';}">
+      <div class="trainer-info">
+        <h1>mbacchen</h1>
+        <div class="subtitle">@zhennnc</div>
+        <div class="game">ANITWT CUP 4</div>
+        <button class="deaths" onclick="document.getElementById('cementerio').classList.add('open');document.body.style.overflow='hidden'">
+          <span class="skull">💀</span> Muertes: <b id="death-count">&nbsp;0</b>
+        </button>
+      </div>
+      <div class="header-right">
+        <div class="label">Medallas</div>
+        <div class="badges-grid">
+          <img class="badge-img" src="https://archives.bulbagarden.net/media/upload/a/a5/Bug_Badge.png"     alt="Medalla Bicho"    title="Medalla Bicho — Viola">
+          <img class="badge-img gray" src="https://archives.bulbagarden.net/media/upload/3/39/Cliff_Badge.png"   alt="Medalla Muro"     title="Medalla Muro — Grant">
+          <img class="badge-img gray" src="https://archives.bulbagarden.net/media/upload/d/d4/Rumble_Badge.png"  alt="Medalla Lid"      title="Medalla Lid — Korrina">
+          <img class="badge-img gray" src="https://archives.bulbagarden.net/media/upload/7/7d/Plant_Badge.png"   alt="Medalla Planta"   title="Medalla Planta — Ramos">
+          <img class="badge-img gray" src="https://archives.bulbagarden.net/media/upload/f/fc/Voltage_Badge.png" alt="Medalla Voltaje"  title="Medalla Voltaje — Lem">
+          <img class="badge-img gray" src="https://archives.bulbagarden.net/media/upload/d/d1/Fairy_Badge.png"   alt="Medalla Hada"     title="Medalla Hada — Valeria">
+          <img class="badge-img gray" src="https://archives.bulbagarden.net/media/upload/1/13/Psychic_Badge.png" alt="Medalla Psique"   title="Medalla Psique — Ástrid">
+          <img class="badge-img gray" src="https://archives.bulbagarden.net/media/upload/8/84/Iceberg_Badge.png" alt="Medalla Iceberg"  title="Medalla Iceberg — Édel">
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="team-label">Equipo</div>
+    <div class="team-row" id="team-row"></div>
+
+    <!-- Tramo 1 (desplegable) -->
+    <button class="tramo-toggle" id="tramo1-btn"
+            onclick="this.classList.toggle('open');document.getElementById('tramo1').classList.toggle('open')">
+      Tramo 1 <span class="chev">▼</span>
+    </button>
+    <div class="tramo-panel" id="tramo1"></div>
+  </section>
+
+  <!-- ── Caja ── -->
+  <section class="box-section">
+    <h2 class="section-title">Caja</h2>
+    <div class="capture-box">
+      <div class="box-grid" id="box-grid"></div>
+    </div>
+  </section>
+
+  <footer>
+    <span class="hearts">♥ ♥</span> — aventura en curso
+  </footer>
+
+</div>
+
+<!-- ── Cementerio ── -->
+<div class="cemetery" id="cementerio">
+  <button class="close-cemetery" title="Volver"
+          onclick="document.getElementById('cementerio').classList.remove('open');document.body.style.overflow=''">✕</button>
+  <div class="cemetery-inner">
+    <h2>⚰️ Cementerio</h2>
+    <div class="graves-row" id="graves-row"></div>
+  </div>
+  <div class="fog"></div>
+</div>
+
+<script>
+  // ═══════════════════════════════════════════════
+  //  DATOS DE LA RUN — editar aquí
+  // ═══════════════════════════════════════════════
+  var TYPE_ES = {
+    normal:'Normal', fire:'Fuego', water:'Agua', grass:'Planta', electric:'Eléctrico',
+    bug:'Bicho', poison:'Veneno', flying:'Volador', ground:'Tierra', rock:'Roca',
+    ice:'Hielo', psychic:'Psíquico', ghost:'Fantasma', dragon:'Dragón', dark:'Siniestro',
+    steel:'Acero', fairy:'Hada', fighting:'Lucha'
+  };
+
+  var POKEMON = {
+    xatu: {
+      species:'Xatu', dex:178, mote:'AO HARU RIDE', genero:'m', nivel:14,
+      tipos:['psychic','flying'], habilidad:'Tinovictoria', ruta:'Ruta 22',
+      ataques:[ {n:'Chupavidas',t:'bug'}, {n:'Ida y Vuelta',t:'bug'},
+                {n:'Gigadrenado',t:'grass'}, {n:'Plancha Voladora',t:'fighting'} ]
+    },
+    horsea: {
+      species:'Horsea', dex:116, mote:'CHUPADORA', genero:'f', nivel:15,
+      tipos:['water'], habilidad:'Piel Tosca', ruta:'Ruta 2',
+      ataques:[ {n:'Destructor',t:'normal'}, {n:'Puño Bala',t:'steel'},
+                {n:'Megaagotar',t:'grass'}, {n:'Chapoteo Lodo',t:'ground'} ]
+    },
+    duskull: {
+      species:'Duskull', dex:355, mote:'DAISUKE', genero:'f', nivel:15,
+      tipos:['ghost'], habilidad:'Humo Blanco', ruta:'Bosque de Novarte',
+      ataques:[ {n:'Impactrueno',t:'electric'}, {n:'Paralizador',t:'grass'},
+                {n:'Puño Bala',t:'steel'}, {n:'Palmeo',t:'fighting'} ]
+    },
+    goomy: {
+      species:'Goomy', dex:704, mote:'OREGAIRU', genero:'m', nivel:14,
+      tipos:['dragon'], habilidad:'Iluminación', ruta:'Starter',
+      ataques:[ {n:'Ataque Rápido',t:'normal'}, {n:'Ráfaga',t:'bug'},
+                {n:'Colmillo Ven',t:'poison'}, {n:'Voz Cautivadora',t:'fairy'} ]
+    },
+    butterfree: {
+      species:'Butterfree', dex:12, mote:'KOROSHI AI', genero:'m', nivel:15,
+      tipos:['bug','flying'], habilidad:'Pelaje Recio', ruta:'Ruta 3',
+      ataques:[ {n:'Impactrueno',t:'electric'}, {n:'Pulso Umbrío',t:'dark'},
+                {n:'Sombra Vil',t:'ghost'}, {n:'Polución',t:'poison'} ]
+    },
+    wooper: {
+      species:'Wooper', dex:194, mote:'GRISAIA', genero:'f', nivel:15,
+      tipos:['water','ground'], habilidad:'Piel Celeste', ruta:'Ruta 2',
+      ataques:[ {n:'Púas',t:'ground'}, {n:'Pistola Agua',t:'water'},
+                {n:'Canon',t:'normal'}, {n:'Somnífero',t:'grass'} ]
+    },
+    pansage: {
+      species:'Pansage', dex:511, mote:null, genero:'m', nivel:4,
+      tipos:['grass'], habilidad:null, ruta:'Ciudad Novarte',
+      ataques:[ {n:'Absorber',t:'grass'}, {n:'Lanzarrocas',t:'rock'},
+                {n:'Colmillo Hielo',t:'ice'} ]
+    }
+  };
+
+  var EQUIPO = ['xatu','horsea','duskull','goomy','butterfree','wooper'];
+  var CAJA = ['pansage'];           // el resto de la caja queda libre
+  var CAJA_ESPACIOS = 12;           // círculos totales visibles en la caja
+  var MUERTOS = [];                 // p. ej. {ref:'gliscor'}
+  var TRAMO1_MUERTES = 0;
+  var TRAMO1 = [
+    { loc:'Starter',        pokes:[ {ref:'goomy'} ] },
+    { loc:'Ruta 2',         pokes:[ {ref:'horsea'}, {ref:'wooper'} ] },
+    { loc:'Bosque Novarte', pokes:[ {ref:'duskull'} ] },
+    { loc:'Ruta 3',         pokes:[ {ref:'butterfree', displayDex:11, displayName:'Metapod'} ] },
+    { loc:'Ciudad Novarte', pokes:[ {ref:'pansage'} ] },
+    { loc:'Ruta 22',        pokes:[ {ref:'xatu'} ] }
+  ];
+
+  // ═══════════════════════════════════════════════
+  //  RENDER
+  // ═══════════════════════════════════════════════
+  var SPRITE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/';
+  var POKEBALL = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png';
+
+  function tipHTML(p) {
+    var title = p.mote || p.species;
+    var gender = p.genero ? '<span class="gender ' + p.genero + '">' + (p.genero === 'm' ? '♂' : '♀') + '</span>' : '';
+    var chips = p.tipos.map(function (t) {
+      return '<span class="type-chip t-' + t + '">' + TYPE_ES[t] + '</span>';
+    }).join('');
+    var rows = '<div class="tip-row">Nv. <b>' + p.nivel + '</b>' +
+               (p.habilidad ? ' &nbsp;·&nbsp; Habilidad: <b>' + p.habilidad + '</b>' : '') + '</div>' +
+               '<div class="tip-row">Capturado en: <b>' + p.ruta + '</b></div>';
+    var moves = '';
+    for (var i = 0; i < 4; i++) {
+      var m = p.ataques[i];
+      moves += m ? '<span class="move mv-' + m.t + '">' + m.n + '</span>'
+                 : '<span class="move none">—</span>';
+    }
+    return '<div class="poke-tip">' +
+             '<div class="tip-head"><span class="poke-name">' + title + gender + '</span>' +
+             '<span class="chips">' + chips + '</span></div>' +
+             rows +
+             '<div class="moves">' + moves + '</div>' +
+           '</div>';
+  }
+
+  function slotHTML(entry, cls) {
+    var p = POKEMON[entry.ref];
+    var dex = entry.displayDex || p.dex;
+    var alt = entry.displayName || p.species;
+    return '<div class="' + cls + ' filled">' +
+             '<img src="' + SPRITE + dex + '.png" alt="' + alt + '">' +
+             tipHTML(p) +
+           '</div>';
+  }
+
+  function emptySlotHTML(cls, ball) {
+    return '<div class="' + cls + ' empty">' + (ball ? '<img src="' + POKEBALL + '" alt="Slot vacío">' : '') + '</div>';
+  }
+
+  // Equipo
+  var teamHtml = EQUIPO.map(function (ref) { return slotHTML({ref: ref}, 'slot'); });
+  while (teamHtml.length < 6) teamHtml.push(emptySlotHTML('slot', true));
+  document.getElementById('team-row').innerHTML = teamHtml.join('');
+
+  // Caja
+  var boxHtml = CAJA.map(function (ref) { return slotHTML({ref: ref}, 'box-slot'); });
+  while (boxHtml.length < CAJA_ESPACIOS) boxHtml.push(emptySlotHTML('box-slot', false));
+  document.getElementById('box-grid').innerHTML = boxHtml.join('');
+
+  // Tramo 1
+  document.getElementById('tramo1').innerHTML = TRAMO1.map(function (row) {
+    var pokes = row.pokes.map(function (e) { return slotHTML(e, 'slot mini'); }).join('');
+    return '<div class="tramo-row"><div class="tramo-loc">' + row.loc + '</div>' +
+           '<div class="tramo-pokes">' + pokes + '</div></div>';
+  }).join('') +
+  '<div class="tramo-row tramo-deaths">💀 Muertes en este tramo: <b>&nbsp;' + TRAMO1_MUERTES + '</b></div>';
+
+  // Cementerio
+  document.getElementById('death-count').innerHTML = '&nbsp;' + MUERTOS.length;
+  document.getElementById('graves-row').innerHTML = MUERTOS.length
+    ? MUERTOS.map(function (e) {
+        var p = POKEMON[e.ref];
+        return '<div class="grave">' +
+                 '<img src="' + SPRITE + p.dex + '.png" alt="' + p.species + '">' +
+                 '<div class="grave-name">' + (p.mote || p.species) + '</div>' +
+                 '<div class="candle">🕯️</div>' +
+                 tipHTML(p) +
+               '</div>';
+      }).join('')
+    : '<div class="no-graves">Ningún caído por ahora… que siga así 🕯️</div>';
+
+  // cerrar cementerio con Escape
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      document.getElementById('cementerio').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  });
+</script>
+</body>
+</html>

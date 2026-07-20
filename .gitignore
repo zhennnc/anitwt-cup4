@@ -1,0 +1,9 @@
+# Config y helpers locales (no se publican)
+.claude/
+
+# Archivos grandes / privados que NO deben subirse a GitHub
+ROM/
+tramo 1/
+*.mp4
+*.3ds
+*.tscproj
